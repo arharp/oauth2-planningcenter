@@ -1,14 +1,15 @@
 <?php
 
-namespace Aego\OAuth2\Client\Test\Provider;
+namespace Arharp\OAuth2\Client\Test\Provider;
 
-use Aego\OAuth2\Client\Provider\Yandex;
-use Aego\OAuth2\Client\Provider\YandexResourceOwner;
+use Arharp\OAuth2\Client\Provider\PlanningCenter;
+use Arharp\OAuth2\Client\Provider\PlanningCenterResourceOwner;
+use PHPUnit\Framework\TestCase;
 
-class YandexTest extends \PHPUnit_Framework_TestCase
+class PlanningCenterTest extends TestCase
 {
     /**
-     * @var Yandex
+     * @var PlanningCenter
      */
     private $provider;
 
@@ -19,8 +20,8 @@ class YandexTest extends \PHPUnit_Framework_TestCase
         $uri = parse_url($url);
         parse_str($uri['query'], $query);
 
-        $this->assertEquals('oauth.yandex.ru', $uri['host']);
-        $this->assertEquals('/authorize', $uri['path']);
+        $this->assertEquals('api.planningcenteronline.com', $uri['host']);
+        $this->assertEquals('/oauth/authorize', $uri['path']);
 
         $this->assertArrayHasKey('client_id', $query);
         $this->assertArrayHasKey('response_type', $query);
@@ -34,12 +35,12 @@ class YandexTest extends \PHPUnit_Framework_TestCase
     {
         $url = $this->provider->getBaseAccessTokenUrl([]);
 
-        $this->assertEquals('https://oauth.yandex.ru/token', $url);
+        $this->assertEquals('https://api.planningcenteronline.com/oauth/token', $url);
     }
 
     public function testGetAccessToken()
     {
-        $response = $this->getMock('Psr\Http\Message\ResponseInterface');
+        $response = $this->createMock('Psr\Http\Message\ResponseInterface');
 
         $response->expects($this->any())
             ->method('getBody')
@@ -107,18 +108,18 @@ class YandexTest extends \PHPUnit_Framework_TestCase
 
         $url = $this->provider->getResourceOwnerDetailsUrl($token);
 
-        $this->assertEquals('https://login.yandex.ru/info?format=json&oauth_token=mock_access_token', $url);
+        $this->assertEquals('https://api.planningcenteronline.com/people/v2/me', $url);
     }
 
     public function testGetResourceOwner()
     {
-        $response = json_decode('{"first_name":"mock_firstname","last_name":"mock_firstname","display_name":"mock_displayname","emails":["test@yandex.ru","other-test@yandex.ru"],"default_email":"test@yandex.ru","real_name":"Vasya Pupkin","birthday":"1987-03-12","default_avatar_id":"131652443","login":"mock_login","old_social_login":"uid-mmzxrnry","sex":"male","id":"1000034426"}', true);
+        $response = json_decode('{"id":"1000034426","name":"User Name"}', true);
 
         $token = $this->getMockBuilder('League\OAuth2\Client\Token\AccessToken')
             ->disableOriginalConstructor()
             ->getMock();
 
-        $provider = $this->getMockBuilder(Yandex::class)
+        $provider = $this->getMockBuilder(PlanningCenter::class)
             ->setMethods(array('fetchResourceOwnerDetails'))
             ->getMock();
 
@@ -127,29 +128,25 @@ class YandexTest extends \PHPUnit_Framework_TestCase
             ->with($this->identicalTo($token))
             ->willReturn($response);
 
-        /** @var YandexResourceOwner $resource */
+        /** @var PlanningCenterResourceOwner $resource */
         $resource = $provider->getResourceOwner($token);
 
-        $this->assertInstanceOf(YandexResourceOwner::class, $resource);
+        $this->assertInstanceOf(PlanningCenterResourceOwner::class, $resource);
 
         $this->assertEquals('1000034426', $resource->getId());
-        $this->assertEquals('mock_login', $resource->getNickname());
-        $this->assertEquals('test@yandex.ru', $resource->getEmail());
-        $this->assertEquals('mock_displayname', $resource->getName());
-        $this->assertEquals('mock_firstname', $resource->getFirstName());
-        $this->assertEquals('mock_firstname', $resource->getLastName());
+        $this->assertEquals('User Name', $resource->getName());
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
-        $this->provider = new Yandex([
+        $this->provider = new PlanningCenter([
             'clientId' => 'mock_client_id',
             'clientSecret' => 'mock_client_secret',
             'redirectUri' => 'none',
         ]);
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $this->provider = null;
     }

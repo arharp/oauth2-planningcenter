@@ -1,23 +1,41 @@
-# Yandex OAuth2 client provider
+# Planning Center OAuth2 client provider
 
-[![Build Status](https://img.shields.io/travis/rakeev/oauth2-yandex.svg)](https://travis-ci.org/rakeev/oauth2-yandex)
-[![Latest Version](https://img.shields.io/packagist/v/aego/oauth2-yandex.svg)](https://packagist.org/packages/aego/oauth2-yandex)
-[![License](https://img.shields.io/packagist/l/aego/oauth2-yandex.svg)](https://packagist.org/packages/aego/oauth2-yandex)
-
-This package provides [Yandex](https://passport.yandex.ru) integration for [OAuth2 Client](https://github.com/thephpleague/oauth2-client) by the League.
+This package provides [PlanningCenter](https://www.planningcenter.com) integration for [OAuth2 Client](https://github.com/thephpleague/oauth2-client) by the League.
 
 ## Installation
 
 ```sh
-composer require aego/oauth2-yandex
+composer require arharp/oauth2-planningcenter
 ```
 
 ## Usage
 
+The following is a basic example of how you would authenticate a user. 
+
+Obtain a client ID and secret by creating an application in your [developer account](https://api.planningcenteronline.com/oauth/applications).
+
 ```php
-$provider = new Aego\OAuth2\Client\Provider\Yandex([
-    'clientId' => 'b80bb7740288fda1f201890375a60c8f',
-    'clientSecret' => 'f23ccd066f8236c6f97a2a62d3f9f9f5',
-    'redirectUri' => 'https://example.org/oauth-endpoint',
+$provider = new Arharp\OAuth2\Client\Provider\PlanningCenter([
+    'clientId' => 'CLIENT_ID',
+    'clientSecret' => 'SECRET',
+    'redirectUri' => 'https://example.org/endpoint',
 ]);
+
+if (! isset($_GET['code'])) {
+    # Get the authorization URL...
+    $url = $provider->getAuthorizationUrl(['scope' => 'people giving']);
+    
+    # Redirect the user...
+    header('Location: ' . $url);
+    
+    exit;
+    
+} else {
+    # Get the access token
+    $accessToken = $provider->getAccessToken('authorization_code', [
+        'code' => $_GET['code']
+    ]);
+    
+    # Do something with the access token...
+}
 ```

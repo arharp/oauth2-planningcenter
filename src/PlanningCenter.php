@@ -1,6 +1,6 @@
 <?php
 
-namespace Aego\OAuth2\Client\Provider;
+namespace Arharp\OAuth2\Client\Provider;
 
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
@@ -8,7 +8,7 @@ use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Tool\BearerAuthorizationTrait;
 use Psr\Http\Message\ResponseInterface;
 
-class Yandex extends AbstractProvider
+class PlanningCenter extends AbstractProvider
 {
     use BearerAuthorizationTrait;
 
@@ -17,7 +17,7 @@ class Yandex extends AbstractProvider
      */
     public function getBaseAuthorizationUrl()
     {
-        return 'https://oauth.yandex.ru/authorize';
+        return 'https://api.planningcenteronline.com/oauth/authorize';
     }
 
     /**
@@ -25,7 +25,7 @@ class Yandex extends AbstractProvider
      */
     public function getBaseAccessTokenUrl(array $params)
     {
-        return 'https://oauth.yandex.ru/token';
+        return 'https://api.planningcenteronline.com/oauth/token';
     }
 
     /**
@@ -33,7 +33,7 @@ class Yandex extends AbstractProvider
      */
     public function getResourceOwnerDetailsUrl(AccessToken $token)
     {
-        return 'https://login.yandex.ru/info?format=json&oauth_token=' . $token->getToken();
+        return 'https://api.planningcenteronline.com/people/v2/me';
     }
 
     /**
@@ -63,6 +63,6 @@ class Yandex extends AbstractProvider
      */
     protected function createResourceOwner(array $response, AccessToken $token)
     {
-        return new YandexResourceOwner($response);
+        return new PlanningCenterResourceOwner($response);
     }
 }
